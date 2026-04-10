@@ -173,7 +173,7 @@ chingguchingg/
 
 ## 👩‍💻 개발자
 
-**AI 2반 김도연**
+**@kxmdoyn**
 
 ---
 

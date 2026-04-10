@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>칭구칭구</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:linear-gradient(135deg,#e8d5f5 0%,#d5e8f5 50%,#f5d5e8 100%);display:flex;justify-content:center;align-items:center;min-height:100vh}
+
+/* ── 폰 프레임 ── */
+.phone{width:393px;height:852px;background:#fff;border-radius:50px;box-shadow:0 40px 100px rgba(0,0,0,0.25),inset 0 0 0 2px #1a1a1a;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.notch{width:126px;height:37px;background:#000;border-radius:0 0 22px 22px;position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:100}
+.screen{display:none;flex-direction:column;height:100%;padding-top:44px;overflow:hidden}
+.screen.active{display:flex}
+
+/* ── 네비게이션 ── */
+.nav{display:flex;background:#fff;border-top:1px solid #f0f0f0;padding:8px 0 28px;position:absolute;bottom:0;left:0;right:0;z-index:50;border-radius:0 0 50px 50px}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px}
+.nav-icon{font-size:24px;transition:transform 0.2s}
+.nav-label{font-size:10px;font-weight:600;color:#bbb;transition:color 0.2s}
+.nav-item.active .nav-label{color:#a78bfa}
+.nav-item.active .nav-icon{transform:scale(1.15)}
+
+/* ── 스플래시 ── */
+#splash{background:linear-gradient(160deg,#fce4ec 0%,#e8eaf6 40%,#e3f2fd 100%);justify-content:center;align-items:center;gap:0}
+.splash-logo{font-size:56px;font-weight:900;color:#1a1a3e;letter-spacing:-2px;margin-bottom:4px}
+.splash-char{font-size:120px;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 20px 30px rgba(167,139,250,0.4));position:relative}
+.bubble{background:#fff;border-radius:24px 24px 24px 6px;padding:10px 20px;font-size:17px;font-weight:700;color:#444;box-shadow:0 8px 24px rgba(0,0,0,0.1);margin-bottom:8px;align-self:flex-start;margin-left:60px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.splash-btns{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:24px}
+.btn-primary{background:linear-gradient(135deg,#74b9ff,#a29bfe);color:#fff;border:none;border-radius:20px;padding:17px 0;font-size:17px;font-weight:800;cursor:pointer;width:300px;box-shadow:0 8px 28px rgba(116,185,255,0.45);transition:transform 0.1s,box-shadow 0.1s}
+.btn-primary:active{transform:scale(0.97);box-shadow:0 4px 14px rgba(116,185,255,0.35)}
+.btn-secondary{background:transparent;border:none;font-size:15px;font-weight:600;color:#a29bfe;cursor:pointer;padding:8px}
+
+/* ── 로그인 ── */
+#login{background:linear-gradient(180deg,#fce4ec 0%,#f5f0ff 60%,#e8f4ff 100%)}
+.login-body{flex:1;padding:20px 28px 20px;display:flex;flex-direction:column;align-items:center}
+.login-logo-wrap{text-align:center;margin:16px 0 28px}
+.login-logo{font-size:42px;font-weight:900;color:#1a1a3e;letter-spacing:-1px}
+.login-char{font-size:60px;animation:float 3s ease-in-out infinite;margin-bottom:4px}
+.login-sub{font-size:13px;color:#888}
+.inp-box{width:100%;background:#fff;border-radius:16px;margin-bottom:12px;display:flex;align-items:center;padding:0 16px;box-shadow:0 3px 12px rgba(0,0,0,0.08)}
+.inp-ico{font-size:18px;margin-right:10px}
+.inp-box input{flex:1;padding:15px 0;border:none;outline:none;font-size:15px;background:transparent;color:#333}
+.login-btn{background:linear-gradient(135deg,#74b9ff,#a29bfe);color:#fff;border:none;border-radius:16px;width:100%;padding:16px;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(116,185,255,0.4);margin-top:4px;transition:transform 0.1s}
+.login-btn:active{transform:scale(0.98)}
+.err-msg{color:#ff6b6b;font-size:12px;text-align:center;margin-top:6px;display:none;font-weight:600}
+.err-msg.on{display:block}
+.login-foot{text-align:center;margin-top:16px;font-size:13px;color:#888}
+.login-foot a{color:#a29bfe;font-weight:700;cursor:pointer}
+
+/* ── 회원가입 ── */
+#signup{background:#f8f5ff;overflow-y:auto}
+.page-hdr{display:flex;align-items:center;padding:54px 20px 12px;background:transparent}
+.back-btn{font-size:28px;color:#333;background:none;border:none;cursor:pointer;margin-right:10px;line-height:1}
+.page-title{font-size:19px;font-weight:800;color:#1a1a3e}
+.signup-body{padding:8px 24px 100px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:700;color:#888;margin-bottom:6px;display:block}
+.form-row{display:flex;gap:8px}
+.form-inp{width:100%;padding:13px 16px;border:1.5px solid #e5e7eb;border-radius:14px;font-size:14px;outline:none;background:#fff;transition:border-color 0.2s}
+.form-inp:focus{border-color:#a29bfe}
+.chk-btn{background:linear-gradient(135deg,#74b9ff,#a29bfe);color:#fff;border:none;border-radius:12px;padding:0 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.gender-row{display:flex;gap:8px}
+.gender-btn{flex:1;padding:12px;border:1.5px solid #e5e7eb;border-radius:14px;background:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;color:#555}
+.gender-btn.sel{border-color:#a29bfe;background:linear-gradient(135deg,#f0ebff,#e8f4ff);color:#a29bfe}
+.signup-btn{background:linear-gradient(135deg,#74b9ff,#a29bfe);color:#fff;border:none;border-radius:16px;width:100%;padding:16px;font-size:17px;font-weight:800;cursor:pointer;margin-top:8px;box-shadow:0 6px 20px rgba(116,185,255,0.35)}
+.hint{font-size:11px;margin-top:4px;display:none;font-weight:600}
+.hint.on{display:block}
+.hint.ok{color:#34d399}
+.hint.ng{color:#ff6b6b}
+
+/* ── 메인 ── */
+#main{background:linear-gradient(180deg,#daeeff 0%,#e8f0ff 45%,#f0ebff 100%)}
+.main-body{flex:1;padding:54px 20px 90px;display:flex;flex-direction:column;align-items:center;overflow-y:auto}
+.main-tag{background:rgba(255,255,255,0.75);backdrop-filter:blur(12px);border-radius:30px;padding:6px 16px;font-size:13px;font-weight:700;color:#555;align-self:flex-start;margin-bottom:2px}
+.main-sub{font-size:14px;color:#666;align-self:flex-start;margin-bottom:14px;padding-left:2px}
+.char-card{background:linear-gradient(135deg,#74b9ff 0%,#a29bfe 60%,#f472b6 100%);border-radius:32px;width:100%;padding:24px 20px 20px;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden;box-shadow:0 16px 48px rgba(116,185,255,0.4)}
+.char-card::before{content:'';position:absolute;width:200px;height:200px;background:rgba(255,255,255,0.1);border-radius:50%;top:-60px;right:-60px}
+.main-char{font-size:140px;animation:float 3s ease-in-out infinite;position:relative;z-index:1;filter:drop-shadow(0 12px 24px rgba(0,0,0,0.15));line-height:1}
+.shortcut{background:#fff;border-radius:24px;width:100%;padding:14px 18px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+.sc-left{display:flex;align-items:center;gap:12px}
+.sc-ico{font-size:26px}
+.sc-title{font-size:14px;font-weight:800;color:#1a1a3e}
+.sc-sub{font-size:12px;color:#888;margin-top:1px}
+.sc-btn{background:linear-gradient(135deg,#74b9ff,#a29bfe);color:#fff;border:none;border-radius:14px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(116,185,255,0.35)}
+
+/* ── 일기 목록 ── */
+#diary{background:#f0f6ff}
+.diary-scroll{flex:1;overflow-y:auto;padding:0 16px 90px}
+.stats-card{background:linear-gradient(135deg,#74b9ff,#a29bfe);border-radius:22px;padding:16px 20px;margin:8px 0 12px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 24px rgba(116,185,255,0.35)}
+.stats-star{font-size:34px}
+.stats-num{font-size:38px;font-weight:900;color:#fff;line-height:1}
+.stats-lbl{font-size:13px;color:rgba(255,255,255,0.85);margin-top:2px}
+.write-tip{background:#fff;border-radius:14px;padding:12px 16px;margin-bottom:12px;font-size:13px;color:#a29bfe;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(162,155,254,0.15)}
+.diary-card{background:#fff;border-radius:20px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 3px 14px rgba(0,0,0,0.07);cursor:pointer;transition:transform 0.15s,box-shadow 0.15s}
+.diary-card:active{transform:scale(0.98);box-shadow:0 1px 6px rgba(0,0,0,0.07)}
+.diary-emo{font-size:34px;flex-shrink:0}
+.diary-info{flex:1;min-width:0}
+.diary-meta{font-size:11px;color:#aaa;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.emo-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.diary-text{font-size:13px;color:#444;line-height:1.55;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.write-fab{position:absolute;bottom:88px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#74b9ff,#a29bfe);color:#fff;border:none;border-radius:30px;padding:14px 28px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 8px 28px rgba(116,185,255,0.5);display:flex;align-items:center;gap:8px;white-space:nowrap;transition:transform 0.1s}
+.write-fab:active{transform:translateX(-50%) scale(0.97)}
+
+/* ── 일기 작성 ── */
+#diary-write{background:#fff}
+.write-hdr{display:flex;align-items:center;justify-content:space-between;padding:54px 20px 12px;border-bottom:1px solid #f3f4f6}
+.save-btn{background:linear-gradient(135deg,#74b9ff,#a29bfe);color:#fff;border:none;border-radius:22px;padding:8px 20px;font-size:14px;font-weight:700;cursor:pointer}
+.write-date-row{padding:12px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:10px}
+.date-lbl{font-size:12px;font-weight:700;color:#aaa}
+.date-inp{background:#f0f6ff;border:none;border-radius:10px;padding:7px 12px;font-size:14px;color:#333;outline:none}
+.write-area{flex:1;padding:18px 20px;overflow-y:auto}
+.write-area textarea{width:100%;height:100%;border:none;outline:none;font-size:16px;line-height:1.9;color:#333;resize:none;font-family:inherit;min-height:280px}
+.write-area textarea::placeholder{color:#ccc}
+.del-bar{padding:0 20px 28px}
+.del-btn{background:#fee2e2;color:#dc2626;border:none;border-radius:14px;width:100%;padding:14px;font-size:14px;font-weight:700;cursor:pointer}
+
+/* ── 리포트 ── */
+#report{background:#f0f6ff}
+.report-scroll{flex:1;overflow-y:auto;padding:0 16px 90px}
+
+/* LangGraph 버튼 - 두드러지게! */
+.wf-btn{background:linear-gradient(135deg,#6c63ff,#f472b6);color:#fff;border:none;border-radius:20px;width:100%;padding:18px;font-size:15px;font-weight:800;cursor:pointer;margin:8px 0 10px;box-shadow:0 8px 28px rgba(108,99,255,0.4);display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;transition:transform 0.1s}
+.wf-btn::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent,rgba(255,255,255,0.1),transparent);transform:rotate(45deg);animation:shine 3s ease-in-out infinite}
+@keyframes shine{0%,100%{transform:rotate(45deg) translateX(-100%)}50%{transform:rotate(45deg) translateX(100%)}}
+.wf-btn:active{transform:scale(0.98)}
+.wf-label{font-size:12px;font-weight:700;background:rgba(255,255,255,0.2);border-radius:8px;padding:3px 8px;letter-spacing:0.5px}
+
+.wf-log{background:#1e1b4b;color:#a5b4fc;border-radius:16px;padding:14px 16px;font-family:'Courier New',monospace;font-size:11px;line-height:1.9;max-height:180px;overflow-y:auto;margin-bottom:12px;display:none;border:1px solid rgba(165,180,252,0.2)}
+.wf-log-line{display:flex;gap:8px}
+.wf-log-node{color:#f472b6;font-weight:700;flex-shrink:0}
+.wf-log-text{color:#a5b4fc}
+.wf-log-ok{color:#34d399}
+.wf-log-warn{color:#fbbf24}
+
+.report-sec-title{font-size:13px;font-weight:700;color:#888;margin-bottom:10px}
+.report-card{background:#fff;border-radius:20px;padding:16px 18px;margin-bottom:10px;cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between;transition:transform 0.15s}
+.report-card:active{transform:scale(0.98)}
+.report-card-l{display:flex;align-items:center;gap:12px}
+.report-cal{font-size:28px}
+.report-date{font-size:15px;font-weight:700;color:#1a1a3e}
+.report-lv{font-size:12px;color:#888;margin-top:2px}
+.badge{font-size:11px;padding:5px 12px;border-radius:20px;font-weight:700}
+.badge-gen{background:#dcfce7;color:#16a34a}
+.badge-insuf{background:#fef3c7;color:#d97706}
+.badge-fail{background:#fee2e2;color:#dc2626}
+.report-empty{text-align:center;color:#bbb;font-size:14px;padding:50px 20px;line-height:2}
+
+/* ── 리포트 상세 ── */
+#report-detail{background:#f0f6ff;overflow-y:auto}
+.detail-scroll{padding:10px 16px 40px}
+.detail-hdr{background:linear-gradient(135deg,#74b9ff,#a29bfe);border-radius:24px;padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 24px rgba(116,185,255,0.3)}
+.detail-ico{font-size:52px}
+.detail-date{font-size:12px;color:rgba(255,255,255,0.8)}
+.detail-title{font-size:22px;font-weight:900;color:#fff;margin-top:2px}
+.det-card{background:#fff;border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:0 3px 14px rgba(0,0,0,0.07)}
+.det-title{font-size:11px;font-weight:700;color:#aaa;letter-spacing:0.5px;margin-bottom:12px;text-transform:uppercase}
+.comment-text{font-size:14px;line-height:1.9;color:#333}
+.emo-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.emo-bar-lbl{font-size:13px;width:72px;display:flex;align-items:center;gap:4px;font-weight:600;color:#444}
+.emo-bar-bg{flex:1;height:10px;background:#f3f4f6;border-radius:5px;overflow:hidden}
+.emo-bar-fill{height:100%;border-radius:5px;transition:width 0.9s ease}
+.emo-bar-pct{font-size:12px;color:#aaa;width:38px;text-align:right}
+.phq-wrap{text-align:center;padding:12px 0}
+.phq-num{font-size:60px;font-weight:900;line-height:1}
+.phq-lbl{font-size:15px;font-weight:700;margin-top:6px}
+.phq-sub{font-size:12px;color:#aaa;margin-top:4px}
+.advice-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.advice-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;background:linear-gradient(135deg,#74b9ff,#a29bfe)}
+.advice-txt{font-size:13px;line-height:1.7;color:#444}
+.crisis-card{background:linear-gradient(135deg,#fee2e2,#fce7f3);border-radius:18px;padding:16px;margin-bottom:12px;border-left:4px solid #f43f5e}
+.crisis-head{font-size:13px;font-weight:700;color:#dc2626;margin-bottom:10px}
+.crisis-row{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.crisis-name{font-size:13px;font-weight:700;color:#1a1a3e}
+.crisis-desc{font-size:11px;color:#aaa}
+.crisis-num{font-size:20px;font-weight:900;color:#a29bfe;margin-left:auto}
+
+/* ── 모달 ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.overlay.on{display:flex}
+.modal{background:#fff;border-radius:32px 32px 0 0;padding:28px 24px 44px;width:393px;text-align:center}
+.modal-ico{font-size:48px;margin-bottom:10px}
+.modal-tit{font-size:19px;font-weight:800;color:#1a1a3e;margin-bottom:8px}
+.modal-desc{font-size:14px;color:#888;line-height:1.7;margin-bottom:22px}
+.modal-btns{display:flex;gap:10px}
+.mbtn{flex:1;padding:15px;border-radius:16px;border:none;font-size:16px;font-weight:700;cursor:pointer}
+.mbtn-cancel{background:#f3f4f6;color:#888}
+.mbtn-ok{background:linear-gradient(135deg,#74b9ff,#a29bfe);color:#fff}
+.mbtn-danger{background:linear-gradient(135deg,#f43f5e,#ec4899);color:#fff}
+
+/* ── 토스트 ── */
+.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(16px);background:rgba(30,27,75,0.92);color:#fff;padding:12px 22px;border-radius:18px;font-size:14px;font-weight:600;opacity:0;transition:all 0.3s;z-index:999;white-space:nowrap;max-width:340px;text-align:center;backdrop-filter:blur(10px)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── 로딩 ── */
+.spin{display:inline-block;width:20px;height:20px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:rotate 0.8s linear infinite}
+@keyframes rotate{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+
+  <!-- ① 스플래시 -->
+  <div class="screen active" id="splash">
+    <div class="splash-char">🫧</div>
+    <div class="bubble">오늘 하루 어땠어?</div>
+    <div class="splash-logo">칭구칭구</div>
+    <div class="splash-btns">
+      <button class="btn-primary" onclick="goTo('login')">로그인</button>
+      <button class="btn-secondary" onclick="goTo('signup')">회원가입</button>
+    </div>
+  </div>
+
+  <!-- ② 로그인 -->
+  <div class="screen" id="login">
+    <div class="login-body">
+      <div class="login-logo-wrap">
+        <div class="login-char">🫧</div>
+        <div class="login-logo">칭구칭구</div>
+        <div class="login-sub">계정 정보로 로그인해 주세요</div>
+      </div>
+      <div class="inp-box"><span class="inp-ico">👤</span><input id="lid" placeholder="아이디" value="demo"></div>
+      <div class="inp-box"><span class="inp-ico">🔒</span><input id="lpw" type="password" placeholder="비밀번호" value="demo1234"></div>
+      <div class="err-msg" id="lerr">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+      <button class="login-btn" onclick="doLogin()">로그인</button>
+      <div class="login-foot">계정이 없으신가요? <a onclick="goTo('signup')">회원가입 화면에서 만들어보세요!</a></div>
+    </div>
+  </div>
+
+  <!-- ③ 회원가입 -->
+  <div class="screen" id="signup">
+    <div class="page-hdr"><button class="back-btn" onclick="goTo('login')">‹</button><span class="page-title">회원가입</span></div>
+    <div class="signup-body">
+      <p style="font-size:13px;color:#aaa;margin-bottom:18px">계정 정보를 입력해 회원가입을 완료해 주세요</p>
+      <div class="form-group">
+        <label class="form-label">아이디</label>
+        <div class="form-row"><input class="form-inp" id="suid" placeholder="아이디를 입력해주세요" style="flex:1"><button class="chk-btn" onclick="chkId()">확인</button></div>
+        <div class="hint" id="idh"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">비밀번호</label>
+        <input class="form-inp" id="supw" type="password" placeholder="8자 이상 입력해주세요">
+        <div class="hint ng" id="pwh" style="display:none">8자 이상 입력해주세요</div>
+      </div>
+      <div class="form-group"><label class="form-label">이름</label><input class="form-inp" id="sunm" placeholder="이름을 입력해주세요"></div>
+      <div class="form-group"><label class="form-label">닉네임</label><input class="form-inp" id="sunk" placeholder="닉네임을 입력해주세요"></div>
+      <div class="form-group"><label class="form-label">생년월일</label><input class="form-inp" id="subd" placeholder="YYYY.MM.DD"></div>
+      <div class="form-group">
+        <label class="form-label">성별</label>
+        <div class="gender-row"><button class="gender-btn sel" id="gm" onclick="sg('m')">남</button><button class="gender-btn" id="gf" onclick="sg('f')">여</button></div>
+      </div>
+      <button class="signup-btn" onclick="doSignup()">회원가입</button>
+    </div>
+  </div>
+
+  <!-- ④ 메인 -->
+  <div class="screen" id="main">
+    <div class="main-body">
+      <div class="main-tag" id="mtag"># 칭구 님은</div>
+      <div class="main-sub" id="msub">오늘의 감정을 기록해보세요 :)</div>
+      <div class="char-card">
+        <div class="main-char" id="mchar">🌫️</div>
+      </div>
+      <div class="shortcut">
+        <div class="sc-left">
+          <span class="sc-ico">📊</span>
+          <div><div class="sc-title">감정리포트 바로가기</div><div class="sc-sub">이번 주는 어떨까?</div></div>
+        </div>
+        <button class="sc-btn" onclick="goTo('report')">바로가기</button>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-item" onclick="goTo('report')"><span class="nav-icon">📋</span><span class="nav-label">리포트</span></div>
+      <div class="nav-item active" onclick="goTo('main')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+      <div class="nav-item" onclick="goTo('diary')"><span class="nav-icon">✏️</span><span class="nav-label">일기</span></div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-label">설정</span></div>
+    </div>
+  </div>
+
+  <!-- ⑤ 일기 목록 -->
+  <div class="screen" id="diary">
+    <div style="padding:54px 16px 6px;font-size:19px;font-weight:800;color:#1a1a3e">마이페이지</div>
+    <div class="diary-scroll">
+      <div class="stats-card">
+        <span class="stats-star">⭐</span>
+        <div><div class="stats-num" id="dcnt">0</div><div class="stats-lbl">나의 일기 수</div></div>
+      </div>
+      <div class="write-tip">😊 오늘의 감정을 간단히 기록해 보세요. 작은 기록이 큰 힘을 만듭니다.</div>
+      <div id="dlist"></div>
+    </div>
+    <button class="write-fab" onclick="openWrite()">✏️ 오늘의 감정 기록하기</button>
+    <div class="nav">
+      <div class="nav-item" onclick="goTo('report')"><span class="nav-icon">📋</span><span class="nav-label">리포트</span></div>
+      <div class="nav-item" onclick="goTo('main')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+      <div class="nav-item active" onclick="goTo('diary')"><span class="nav-icon">✏️</span><span class="nav-label">일기</span></div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-label">설정</span></div>
+    </div>
+  </div>
+
+  <!-- ⑥ 일기 작성 -->
+  <div class="screen" id="diary-write">
+    <div class="write-hdr">
+      <button class="back-btn" onclick="goTo('diary')">‹</button>
+      <span class="page-title">감정 기록</span>
+      <button class="save-btn" onclick="saveDiary()">저장 ✓</button>
+    </div>
+    <div class="write-date-row">
+      <span class="date-lbl">오늘의 날짜</span>
+      <input type="date" class="date-inp" id="wdate">
+    </div>
+    <div class="write-area"><textarea id="wtxt" placeholder="오늘 느낀 감정, 있었던 일에 대해 편하게 적어보세요."></textarea></div>
+    <div class="del-bar"><button class="del-btn" id="delbtn" onclick="confirmDel()" style="display:none">일기 삭제하기</button></div>
+  </div>
+
+  <!-- ⑦ 리포트 목록 -->
+  <div class="screen" id="report">
+    <div style="padding:54px 16px 6px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:19px;font-weight:800;color:#1a1a3e">리포트 통계</span>
+      <button onclick="loadReports()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#a29bfe">↻</button>
+    </div>
+    <div class="report-scroll">
+      <!-- LangGraph 버튼 - 두드러지게 -->
+      <button class="wf-btn" onclick="runWorkflow()">
+        <span>⚡</span>
+        <span>LangGraph 주간 워크플로우 실행</span>
+        <span class="wf-label">NodeA→E</span>
+      </button>
+      <div class="wf-log" id="wflog"></div>
+      <div class="report-sec-title">내 감정 리포트</div>
+      <div id="rlist"><div class="report-empty">아직 리포트가 없어요 😢<br>위 버튼으로 워크플로우를 실행해보세요!</div></div>
+    </div>
+    <div class="nav">
+      <div class="nav-item active" onclick="goTo('report')"><span class="nav-icon">📋</span><span class="nav-label">리포트</span></div>
+      <div class="nav-item" onclick="goTo('main')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></div>
+      <div class="nav-item" onclick="goTo('diary')"><span class="nav-icon">✏️</span><span class="nav-label">일기</span></div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-label">설정</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 리포트 상세 -->
+  <div class="screen" id="report-detail">
+    <div class="page-hdr"><button class="back-btn" onclick="goTo('report')">‹</button><span class="page-title">감정 리포트</span></div>
+    <div class="detail-scroll" id="detbody" style="overflow-y:auto;flex:1"></div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<!-- 삭제 모달 -->
+<div class="overlay" id="del-modal">
+  <div class="modal">
+    <div class="modal-ico">⚠️</div>
+    <div class="modal-tit">정말 삭제할거야? ㅠㅠ</div>
+    <div class="modal-desc">삭제한 일기는 복구할 수 없어요.</div>
+    <div class="modal-btns">
+      <button class="mbtn mbtn-cancel" onclick="closeModal('del-modal')">아니요</button>
+      <button class="mbtn mbtn-danger" onclick="doDel()">예</button>
+    </div>
+  </div>
+</div>
+
+<!-- insufficient_data 모달 -->
+<div class="overlay" id="insuf-modal">
+  <div class="modal">
+    <div class="modal-ico">⚠️</div>
+    <div class="modal-tit">일기가 부족해서 리포트를<br>만들지 못했어요</div>
+    <div class="modal-desc">조금 더 써볼까요?</div>
+    <div class="modal-btns">
+      <button class="mbtn mbtn-cancel" onclick="closeModal('insuf-modal')">아니요</button>
+      <button class="mbtn mbtn-ok" onclick="closeModal('insuf-modal');openWrite()">예</button>
+    </div>
+  </div>
+</div>
+
+<!-- 워크플로우 완료 모달 -->
+<div class="overlay" id="wf-modal">
+  <div class="modal">
+    <div class="modal-ico" id="wfico">✅</div>
+    <div class="modal-tit" id="wftit">리포트 생성 완료!</div>
+    <div class="modal-desc" id="wfdesc">주간 리포트가 생성됐어요.</div>
+    <div class="modal-btns"><button class="mbtn mbtn-ok" onclick="closeModal('wf-modal');loadReports()">확인</button></div>
+  </div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:8000';
+const EM = {
+  happy:       {e:'😊', l:'기쁨',  c:'#fbbf24'},
+  angry:       {e:'😤', l:'화남',  c:'#f87171'},
+  sad:         {e:'😢', l:'슬픔',  c:'#60a5fa'},
+  anxious:     {e:'😰', l:'불안',  c:'#a78bfa'},
+  hurt:        {e:'🥺', l:'상처',  c:'#f472b6'},
+  embarrassed: {e:'😳', l:'당황',  c:'#fb923c'},
+};
+const LVL = {normal:'정상',mild:'경증',moderate:'중등도',moderately_severe:'중등도-중증',severe:'중증'};
+const LVLC = {normal:'#16a34a',mild:'#65a30d',moderate:'#d97706',moderately_severe:'#ea580c',severe:'#dc2626'};
+let curDiaryId = null;
+
+function goTo(s) {
+  document.querySelectorAll('.screen').forEach(x => x.classList.remove('active'));
+  document.getElementById(s).classList.add('active');
+  if(s==='diary') loadDiaries();
+  if(s==='main') refreshMain();
+  if(s==='report') loadReports();
+}
+function showToast(m, d=3000) {
+  const t=document.getElementById('toast');
+  t.textContent=m; t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'), d);
+}
+function closeModal(id) { document.getElementById(id).classList.remove('on'); }
+
+// ── 로그인 ─────────────────────────────────
+async function doLogin() {
+  const un=document.getElementById('lid').value, pw=document.getElementById('lpw').value;
+  try {
+    const r=await fetch(`${API}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_name:un,user_password:pw})});
+    if(!r.ok){document.getElementById('lerr').classList.add('on');return}
+    document.getElementById('lerr').classList.remove('on');
+    refreshMain(); goTo('main');
+  } catch(e) { showToast('🚨 서버를 먼저 실행해주세요 (python main.py)'); }
+}
+
+// ── 회원가입 ───────────────────────────────
+function sg(g) { document.getElementById('gm').classList.toggle('sel',g==='m'); document.getElementById('gf').classList.toggle('sel',g==='f'); }
+async function chkId() {
+  const v=document.getElementById('suid').value; if(!v) return;
+  const r=await fetch(`${API}/auth/check-username?user_name=${v}`), d=await r.json();
+  const h=document.getElementById('idh');
+  h.textContent = d.available ? '✓ 사용 가능한 아이디예요' : '이미 사용 중인 아이디입니다';
+  h.className = d.available ? 'hint ok on' : 'hint ng on';
+}
+async function doSignup() {
+  const pw=document.getElementById('supw').value;
+  if(pw.length<8){document.getElementById('pwh').style.display='block';return}
+  const r=await fetch(`${API}/auth/signup`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_name:document.getElementById('suid').value,user_password:pw,nickname:document.getElementById('sunk').value,birthdate:document.getElementById('subd').value,gender:document.getElementById('gm').classList.contains('sel')?'female':'male'})});
+  if(r.ok){showToast('회원가입 완료! 🎉');goTo('login')}
+  else{const d=await r.json();showToast(d.detail||'오류가 발생했어요')}
+}
+
+// ── 메인 ───────────────────────────────────
+async function refreshMain() {
+  try {
+    const r=await fetch(`${API}/users/me`), d=await r.json(), u=d.data;
+    const em=EM[u.top_emotion];
+    document.getElementById('mtag').textContent=`# ${u.nickname} 님은`;
+    document.getElementById('mchar').textContent=em?em.e:'🌫️';
+    document.getElementById('msub').textContent=em?`${em.l} 감정이 느껴지는 하루예요.`:'오늘의 감정을 기록해보세요 :)';
+  } catch(e){}
+}
+
+// ── 일기 ───────────────────────────────────
+async function loadDiaries() {
+  try {
+    const r=await fetch(`${API}/diaries`), d=await r.json();
+    document.getElementById('dcnt').textContent=d.total;
+    document.getElementById('dlist').innerHTML=d.diaries.map(x=>{
+      const em=EM[x.top_emotion]||{e:'📝',l:'',c:'#aaa'};
+      return`<div class="diary-card" onclick="openEdit('${x.diary_id}','${x.diary_date}',\`${x.content.replace(/`/g,"'")}\`)">
+        <span class="diary-emo">${em.e}</span>
+        <div class="diary-info">
+          <div class="diary-meta">${x.diary_date} <span class="emo-badge" style="background:${em.c}22;color:${em.c}">${em.l}</span></div>
+          <div class="diary-text">${x.content}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){}
+}
+function openWrite() {
+  curDiaryId=null;
+  document.getElementById('wdate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('wtxt').value='';
+  document.getElementById('delbtn').style.display='none';
+  goTo('diary-write');
+}
+function openEdit(id,date,content) {
+  curDiaryId=id;
+  document.getElementById('wdate').value=date;
+  document.getElementById('wtxt').value=content;
+  document.getElementById('delbtn').style.display='block';
+  goTo('diary-write');
+}
+async function saveDiary() {
+  const txt=document.getElementById('wtxt').value, dt=document.getElementById('wdate').value;
+  if(!txt.trim()){showToast('일기 내용을 입력해주세요');return}
+  try {
+    const r=await fetch(`${API}/diaries`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:txt,diary_date:dt})});
+    const d=await r.json();
+    if(!r.ok){if(r.status===409)showToast('오늘 일기는 이미 작성했어요');return}
+    const w=d.data.warning, em=EM[d.data.emotion_result?.top_emotion];
+    if(w==='text_too_short') showToast('조금 더 써볼까요? 감정을 더 잘 파악할 수 있어요 😊',3500);
+    else if(em) showToast(`오늘의 감정: ${em.e} ${em.l}`,2500);
+    setTimeout(()=>{goTo('diary');refreshMain()},800);
+  } catch(e){showToast('저장 중 오류가 발생했어요')}
+}
+function confirmDel() { document.getElementById('del-modal').classList.add('on'); }
+async function doDel() {
+  closeModal('del-modal');
+  if(!curDiaryId) return;
+  await fetch(`${API}/diaries/${curDiaryId}`,{method:'DELETE'});
+  showToast('일기가 삭제되었어요');
+  goTo('diary'); refreshMain();
+}
+
+// ── 리포트 ─────────────────────────────────
+async function loadReports() {
+  try {
+    const r=await fetch(`${API}/reports`), d=await r.json();
+    const el=document.getElementById('rlist');
+    if(!d.reports||!d.reports.length){
+      el.innerHTML='<div class="report-empty">아직 리포트가 없어요 😢<br>위 버튼으로 워크플로우를 실행해보세요!</div>';return;
+    }
+    el.innerHTML=d.reports.map(x=>{
+      const s=x.report_status, lv=LVL[x.depression_level]||'';
+      const badge=s==='generated'?'badge-gen':s==='insufficient_data'?'badge-insuf':'badge-fail';
+      const bLabel=s==='generated'?'정식':s==='insufficient_data'?'데이터 부족':'실패';
+      return`<div class="report-card" onclick="showReport('${x.week_start}')">
+        <div class="report-card-l">
+          <span class="report-cal">📅</span>
+          <div><div class="report-date">${x.week_start} 주간</div><div class="report-lv">${s==='generated'?lv:'데이터 부족'}</div></div>
+        </div>
+        <span class="badge ${badge}">${bLabel}</span>
+      </div>`;
+    }).join('');
+  } catch(e){}
+}
+async function showReport(ws) {
+  try {
+    const r=await fetch(`${API}/reports/${ws}`);
+    if(!r.ok){document.getElementById('insuf-modal').classList.add('on');return}
+    const d=await r.json(); renderDetail(d.data||d); goTo('report-detail');
+  } catch(e){}
+}
+function renderDetail(r) {
+  let h='';
+  const em=EM[r.top_emotions?.[0]?.label]||{e:'📊',l:'감정',c:'#74b9ff'};
+  h+=`<div class="detail-hdr"><span class="detail-ico">${em.e}</span><div><div class="detail-date">📅 ${r.week_start||''} ~ ${r.week_end||''}</div><div class="detail-title">감정 리포트</div></div></div>`;
+  if(r.self_harm_risk==='active'&&r.resources){
+    h+=`<div class="crisis-card"><div class="crisis-head">⚠️ 위기 연락처</div>${r.resources.map(x=>`<div class="crisis-row"><span style="font-size:24px">📞</span><div><div class="crisis-name">${x.name}</div><div class="crisis-desc">${x.desc||'24시간'}</div></div><span class="crisis-num">${x.phone}</span></div>`).join('')}</div>`;
+  }
+  if(r.weekly_summary){
+    h+=`<div class="det-card"><div class="det-title">💬 감정 리포트</div><div class="comment-text">${r.weekly_summary}</div></div>`;
+  }
+  if(r.top_emotions?.length){
+    h+=`<div class="det-card"><div class="det-title">📊 감정 분포 (상위 5개)</div>${r.top_emotions.slice(0,5).map(x=>{const e=EM[x.label]||{e:'😶',l:x.label,c:'#aaa'};const p=Math.round(x.avg_prob*100);return`<div class="emo-bar-row"><span class="emo-bar-lbl">${e.e} ${e.l}</span><div class="emo-bar-bg"><div class="emo-bar-fill" style="width:${p}%;background:${e.c}"></div></div><span class="emo-bar-pct">${p}%</span></div>`}).join('')}</div>`;
+  }
+  if(r.phq9_total!=null){
+    const lv=r.depression_level||'normal';
+    h+=`<div class="det-card"><div class="det-title">🧠 PHQ-9 우울도 평가</div><div class="phq-wrap"><div class="phq-num" style="color:${LVLC[lv]||'#74b9ff'}">${r.phq9_total}</div><div class="phq-lbl" style="color:${LVLC[lv]||'#74b9ff'}">${LVL[lv]||lv}</div><div class="phq-sub">/ 27점 만점</div></div></div>`;
+  }
+  if(r.advice?.length){
+    h+=`<div class="det-card"><div class="det-title">💡 이번 주 조언</div>${r.advice.map(a=>`<div class="advice-row"><div class="advice-dot"></div><div class="advice-txt">${a}</div></div>`).join('')}</div>`;
+  }
+  if(r.self_harm_risk==='passive'){
+    h+=`<div class="det-card" style="border-left:4px solid #fbbf24"><div class="det-title" style="color:#d97706">⚠️ 전문가 상담 권유</div><div style="font-size:13px;color:#444;line-height:1.7">전문가와 상담해보는 것을 권장해요. 혼자 견디지 않아도 괜찮아요.</div></div>`;
+  }
+  // LangGraph 분기 경로 정보
+  if(r.node_b_branch||r.node_d_branch){
+    h+=`<div class="det-card" style="background:#1e1b4b"><div class="det-title" style="color:#a5b4fc">⚡ LangGraph 분기 경로</div>
+      <div style="font-size:12px;font-family:monospace;line-height:2;color:#c4b5fd">
+        NodeB: <span style="color:#34d399">${r.node_b_branch||'-'}</span><br>
+        NodeD: <span style="color:#34d399">${r.node_d_branch||'-'}</span><br>
+        escalation: <span style="color:${r.escalation_status==='sent'?'#f472b6':'#34d399'}">${r.escalation_status||'none'}</span>
+      </div></div>`;
+  }
+  document.getElementById('detbody').innerHTML=h;
+}
+
+// ── LangGraph 워크플로우 실행 ──────────────
+async function runWorkflow() {
+  const btn=document.querySelector('.wf-btn'), log=document.getElementById('wflog');
+  btn.innerHTML='<span class="spin"></span> LangGraph 실행 중...';
+  btn.disabled=true; log.style.display='block'; log.innerHTML='';
+
+  const steps=[
+    {node:'시작',text:'칭구칭구 LangGraph 주간 워크플로우 실행...'},
+    {node:'NodeA',text:'주간 데이터 수집 및 유효성 검사...'},
+    {node:'NodeA',text:'일기 데이터 확인 완료',ok:true},
+    {node:'NodeB',text:'데이터 충분성 분기 (conditional edge)...'},
+    {node:'NodeB',text:'데이터 충분 → full 정식 경로',ok:true},
+    {node:'NodeC',text:'PHQ-9 및 위험도 평가 (LLM proxy scoring)...'},
+    {node:'NodeC',text:'GPT PHQ-9 추론 완료',ok:true},
+    {node:'NodeD',text:'위험도 기반 후속 생성 분기 (conditional edge)...'},
+    {node:'NodeD',text:'일반 경로 → 요약 + 조언 생성',ok:true},
+    {node:'NodeE',text:'weekly_report 저장 + top_emotion 재계산...'},
+    {node:'NodeE',text:'✅ 저장 완료 (checkpoint 기록)',ok:true},
+  ];
+
+  for(const s of steps){
+    await new Promise(r=>setTimeout(r,320));
+    const cls=s.ok?'wf-log-ok':s.node==='시작'?'wf-log-warn':'wf-log-text';
+    log.innerHTML+=`<div class="wf-log-line"><span class="wf-log-node">[${s.node}]</span><span class="${cls}">${s.text}</span></div>`;
+    log.scrollTop=log.scrollHeight;
+  }
+
+  try {
+    const res=await fetch(`${API}/internal/run-workflow`,{method:'POST'});
+    const data=await res.json(), r=data.result;
+    btn.innerHTML='<span>⚡</span><span>LangGraph 주간 워크플로우 실행</span><span class="wf-label">NodeA→E</span>';
+    btn.disabled=false;
+
+    if(r.report_status==='generated'){
+      document.getElementById('wfico').textContent='✅';
+      document.getElementById('wftit').textContent='리포트 생성 완료!';
+      document.getElementById('wfdesc').textContent=`우울도: ${LVL[r.depression_level]||r.depression_level||'-'}\n주간 리포트가 생성됐어요.`;
+    } else if(r.report_status==='insufficient_data'){
+      document.getElementById('wfico').textContent='⚠️';
+      document.getElementById('wftit').textContent='데이터가 부족해요';
+      document.getElementById('wfdesc').textContent='일기가 부족해서 정식 리포트를 만들지 못했어요.';
+    } else {
+      document.getElementById('wfico').textContent='📭';
+      document.getElementById('wftit').textContent='일기가 없어요';
+      document.getElementById('wfdesc').textContent='이번 주 일기를 먼저 작성해보세요!';
+    }
+    document.getElementById('wf-modal').classList.add('on');
+    refreshMain();
+  } catch(e){
+    btn.innerHTML='<span>⚡</span><span>LangGraph 주간 워크플로우 실행</span><span class="wf-label">NodeA→E</span>';
+    btn.disabled=false;
+    showToast('🚨 서버를 먼저 실행해주세요 (python main.py)');
+  }
+}
+
+// 초기화
+document.getElementById('wdate').value=new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>

@@ -5,6 +5,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green.svg)](https://fastapi.tiangolo.com)
 [![LangGraph](https://img.shields.io/badge/LangGraph-0.2-purple.svg)](https://langchain-ai.github.io/langgraph)
 [![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0-orange.svg)](https://swagger.io)
+<img width="1189" height="597" alt="image" src="https://github.com/user-attachments/assets/d1518ed1-1dc6-4907-b12f-56078025f85d" />
 
 ---
 

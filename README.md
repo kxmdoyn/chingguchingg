@@ -11,6 +11,7 @@
 ## 📖 서비스 개요
 
 청소년의 정서 건강을 위한 일기 기반 감정 분석 + 주간 리포트 자동 생성 서비스입니다.
+<img width="1232" height="680" alt="image" src="https://github.com/user-attachments/assets/63a9233b-5e5a-4d5d-a1a1-94ad4765d5e9" />
 
 - **KoBERT 기반** 감정 분석 (6가지 감정)
 - **LangGraph 5노드 워크플로우** 기반 주간 리포트 자동 생성
@@ -40,6 +41,7 @@ APScheduler (매주 일요일 23:59)
 ---
 
 ## ⚡ LangGraph 워크플로우
+<img width="1234" height="696" alt="image" src="https://github.com/user-attachments/assets/66aea7c2-e1bc-48f9-95c7-4110a86f2b23" />
 
 ```
 NodeA (데이터 수집·유효성 검사)
